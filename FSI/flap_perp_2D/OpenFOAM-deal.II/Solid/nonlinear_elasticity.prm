@@ -71,7 +71,10 @@ subsection precice configuration
     set Participant name    = Solid
 
     # Name of the coupling mesh in the precice-config.xml file
-    set Mesh name           = Solid_mesh
+    set Read mesh name           = read-mesh
+
+    # Name of the coupling mesh in the precice-config.xml file
+    set Write mesh name           = write-mesh
 
     # Name of the read data in the precice-config.xml file
     set Read data name      = Stress
