@@ -21,11 +21,24 @@ boundaryField
         gradient        uniform -2;
     }
 
+    DirichletBoundary2
+    {
+        type            groovyBC;
+        variables       "val=1+pow(pos().x,2)+(3*pow(pos().y,2))+1.3*time();grad=(6*pos().y);";
+        fractionExpression "(true) ? 0 : 1";
+        valueExpression "val";
+        gradientExpression "grad";
+        value           uniform 0;
+        evaluateDuringConstruction 1;
+
+    }
     DirichletBoundary
     {
         type            groovyBC;
-        variables       "val=1+pow(pos().x,2)+(3*pow(pos().y,2))+1.3*time();";
+        variables       "val=1+pow(pos().x,2)+(3*pow(pos().y,2))+1.3*time();grad=(2*pos().x);";
+        fractionExpression "(true) ? 0 : 1";
         valueExpression "val";
+        gradientExpression "grad";
         value           uniform 0;
         evaluateDuringConstruction 1;
     }

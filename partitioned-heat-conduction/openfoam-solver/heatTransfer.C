@@ -41,74 +41,92 @@
 
 int main(int argc, char *argv[])
 {
-    argList::addNote
-    (
-        "Laplace equation solver for a scalar quantity."
-    );
+    argList::addNote(
+        "Laplace equation solver for a scalar quantity.");
 
-    #include "postProcess.H"
+#include "postProcess.H"
 
-    #include "addCheckCaseOptions.H"
-    #include "setRootCaseLists.H"
-    #include "createTime.H"
-    #include "createMesh.H"
+#include "addCheckCaseOptions.H"
+#include "setRootCaseLists.H"
+#include "createTime.H"
+#include "createMesh.H"
 
     simpleControl simple(mesh);
 
-    #include "createFields.H"
+#include "createFields.H"
 
     // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-    Info<< "\nCalculating temperature distribution\n" << endl;
+    Info << "\nCalculating temperature distribution\n"
+         << endl;
 
     const double alpha = 3;
-    const double beta  = 1.3;
-    const double rhs   = beta - 2 - 2 * alpha;
+    const double beta = 1.3;
+    const double rhs = beta - 2 - 2 * alpha;
 
-    volScalarField f
-     (
-         IOobject
-         (
-             "RHS",
-             runTime.timeName(),
-             mesh,
-             IOobject::NO_READ,
-             IOobject::NO_WRITE
-         ),
-         mesh,
-         dimensionedScalar(
-         "Tdim",
-         dimensionSet(0, 0, -1, 1, 0, 0, 0),
-         Foam::scalar(rhs))
-     );
+    volScalarField f(
+        IOobject(
+            "RHS",
+            runTime.timeName(),
+            mesh,
+            IOobject::NO_READ,
+            IOobject::NO_WRITE),
+        mesh,
+        dimensionedScalar(
+            "Tdim",
+            dimensionSet(0, 0, -1, 1, 0, 0, 0),
+            Foam::scalar(rhs)));
+
+    {
+        double error = 0;
+        const Foam::volScalarField *T_(&mesh.lookupObject<volScalarField>("T"));
+
+        // Get the locations of the volume centered mesh vertices
+        const vectorField &CellCenters = mesh.C();
+        unsigned int numDataLocations = CellCenters.size();
+
+        for (int i = 0; i < CellCenters.size(); i++)
+        {
+            const double coord_x = CellCenters[i].x();
+            const double coord_y = CellCenters[i].y();
+
+            const double exact_solution = 1 + (coord_x * coord_x) +
+                                          (alpha * coord_y * coord_y) + beta * runTime.value();
+
+            error += (exact_solution - T_->internalField()[i]) *
+                     (exact_solution - T_->internalField()[i]);
+        }
+        const double time = runTime.value();
+
+        Info << "\n\nLocal square root error: " << std::sqrt(error / numDataLocations) << " at t = " << time << endl;
+        Info << "Global absolute error: " << error << " at t = " << time << "\n"
+             << endl;
+    }
 
     while (simple.loop())
     {
-        Info<< "Time = " << runTime.timeName() << nl << endl;
+        Info << "Time = " << runTime.timeName() << nl << endl;
 
         while (simple.correctNonOrthogonal())
         {
-            fvScalarMatrix TEqn
-            (
-                fvm::ddt(T) - fvm::laplacian(DT, T) - fvm::Su(f,T)
-             ==
-                fvOptions(T)
-            );
+            fvScalarMatrix TEqn(
+                fvm::ddt(T) - fvm::laplacian(DT, T) - fvm::Su(f, T) ==
+                fvOptions(T));
 
             fvOptions.constrain(TEqn);
             TEqn.solve();
             fvOptions.correct(T);
         }
 
-        #include "write.H"
+#include "write.H"
 
         runTime.printExecutionTime(Info);
     }
 
-    Info<< "End\n" << endl;
+    Info << "End\n"
+         << endl;
 
     return 0;
 }
-
 
 // ************************************************************************* //

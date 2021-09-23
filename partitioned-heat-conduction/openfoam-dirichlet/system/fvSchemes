@@ -1,3 +1,6 @@
+/*--------------------------------*- C++ -*----------------------------------*\
+\*---------------------------------------------------------------------------*/
+
 FoamFile
 {
     version     2.0;
@@ -14,7 +17,7 @@ ddtSchemes
 
 gradSchemes
 {
-    default         Gauss linear;
+    default         none;
     grad(T)         Gauss linear;
 }
 
@@ -31,10 +34,15 @@ laplacianSchemes
 
 interpolationSchemes
 {
-    default         linear;
+    default         none;
 }
 
 snGradSchemes
 {
-    default         corrected;
+    default         none;
+}
+
+fluxRequired
+{
+    default         no;
 }
