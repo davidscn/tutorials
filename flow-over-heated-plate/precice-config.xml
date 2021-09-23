@@ -48,13 +48,14 @@
     <m2n:sockets from="Fluid" to="Solid" exchange-directory=".." />
 
     <coupling-scheme:serial-implicit>
-      <time-window-size value="0.01" />
-      <max-time value="1" />
+      <time-window-size value="0.005" />
+      <max-time value="0.2" />
       <max-iterations value="30" />
       <participants first="Fluid" second="Solid" />
       <exchange data="Temperature" mesh="Fluid-Mesh" from="Fluid" to="Solid" />
       <exchange data="Heat-Flux" mesh="Solid-Mesh" from="Solid" to="Fluid" />
-      <relative-convergence-measure limit="1.0e-5" data="Temperature" mesh="Fluid-Mesh" />
+      <absolute-convergence-measure limit="1.0e-2" data="Temperature" mesh="Fluid-Mesh" />
+      <absolute-convergence-measure limit="1.0e-2" data="Heat-Flux" mesh="Solid-Mesh" />
       <acceleration:aitken>
         <data mesh="Solid-Mesh" name="Heat-Flux" />
         <initial-relaxation value="0.5" />
